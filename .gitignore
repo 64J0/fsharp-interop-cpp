@@ -1,0 +1,49 @@
+# Build artifacts
+build/
+bin/
+obj/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# .NET specific
+*.user
+*.suo
+*.userprefs
+.packages/
+packages/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Compiled libraries
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+.nuget/

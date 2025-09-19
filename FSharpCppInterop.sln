@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02307BC3-F5FE-4E9C-BDEF-8F80A2CBD3C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fsharp", "fsharp", "{1FA7F321-8E62-4F83-98F4-5527AC570EBA}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpCppInterop", "src\fsharp\FSharpCppInterop\FSharpCppInterop.fsproj", "{5D233B6E-3608-43E5-9622-34BD2DCC580C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{45153640-872B-455A-BC76-61B012C40655}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "InteropTests", "tests\InteropTests\InteropTests.fsproj", "{51B1AB79-97F2-4644-B0DD-7E396BFD3815}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5D233B6E-3608-43E5-9622-34BD2DCC580C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D233B6E-3608-43E5-9622-34BD2DCC580C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D233B6E-3608-43E5-9622-34BD2DCC580C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D233B6E-3608-43E5-9622-34BD2DCC580C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51B1AB79-97F2-4644-B0DD-7E396BFD3815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51B1AB79-97F2-4644-B0DD-7E396BFD3815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51B1AB79-97F2-4644-B0DD-7E396BFD3815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51B1AB79-97F2-4644-B0DD-7E396BFD3815}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1FA7F321-8E62-4F83-98F4-5527AC570EBA} = {02307BC3-F5FE-4E9C-BDEF-8F80A2CBD3C7}
+		{5D233B6E-3608-43E5-9622-34BD2DCC580C} = {1FA7F321-8E62-4F83-98F4-5527AC570EBA}
+		{51B1AB79-97F2-4644-B0DD-7E396BFD3815} = {45153640-872B-455A-BC76-61B012C40655}
+	EndGlobalSection
+EndGlobal
