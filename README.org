@@ -68,3 +68,10 @@ platform-specific prefixes and suffixes (e.g., ~lib~ and ~.so~ on Linux).
 
 This Makefile automates the entire process, making it much easier to manage the
 interop solution.
+
+** Other low-level projects
+
+- [[https://github.com/64J0/samples--assembly][64J0/samples--assembly]]
+- [[https://github.com/64J0/samples--il][64J0/samples--il]]
+- [[https://github.com/64J0/fsharp--simd-vector-addition][64J0/fsharp--simd-vector-addition]]
+- [[https://github.com/64J0/starting-eBPF][64J0/starting-eBPF]]
