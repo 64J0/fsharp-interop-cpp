@@ -56,6 +56,10 @@ echo
 echo "Build and test completed successfully!"
 echo "Library path set to: $LD_LIBRARY_PATH"
 echo
+echo "Libraries built:"
+echo "  - libmath_operations.so (C library)"
+echo "  - libcpp_operations.so (C++ library)"
+echo
 echo "To run the demo again:"
 echo "  export LD_LIBRARY_PATH=$SCRIPT_DIR/build:\$LD_LIBRARY_PATH"
 echo "  cd $SCRIPT_DIR/src/fsharp/FSharpCppInterop"

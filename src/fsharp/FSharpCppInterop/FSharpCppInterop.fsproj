@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="MathOperationsInterop.fs" />
+    <Compile Include="CppOperationsInterop.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

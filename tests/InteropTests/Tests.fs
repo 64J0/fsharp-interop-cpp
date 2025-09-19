@@ -4,6 +4,7 @@ open System
 open System.Text
 open Xunit
 open MathOperationsInterop
+open CppOperationsInterop
 
 // Helper function to check if library is available
 let skipIfLibraryUnavailable() =
@@ -11,6 +12,14 @@ let skipIfLibraryUnavailable() =
         add_integers(1, 1) |> ignore
     with
     | _ -> () // Skip test if library is not available - we'll handle this in the test runner
+
+// Helper function to check if C++ library is available  
+let skipIfCppLibraryUnavailable() =
+    try
+        use vector = new CppVector()
+        vector.Add(1)
+    with
+    | _ -> () // Skip test if C++ library is not available
 
 [<Fact>]
 let ``Basic integer addition works correctly`` () =
@@ -145,3 +154,61 @@ let ``Memory management works correctly`` () =
             "Success"
         )
     Assert.Equal("Success", result)
+
+// C++ Tests
+[<Fact>]
+let ``C++ Vector operations work correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use vector = new CppVector()
+    vector.Add(10)
+    vector.Add(5)
+    vector.Add(20)
+    
+    Assert.Equal(3, vector.Size)
+    Assert.Equal(35, vector.Sum())
+    Assert.Equal(20, vector.Get(2))
+
+[<Fact>]
+let ``C++ String operations work correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use str = new CppString("Hello")
+    Assert.Equal(5, str.Length)
+    
+    str.Append(" World")
+    Assert.Equal("Hello World", str.Value)
+    
+    str.ToUpper()
+    Assert.Equal("HELLO WORLD", str.Value)
+
+[<Fact>]
+let ``C++ Mathematical operations work correctly`` () =
+    skipIfCppLibraryUnavailable()
+    let values = [| 2.0; 4.0; 6.0; 8.0 |]
+    let (mean, variance, stdDev) = calculateStatistics(values)
+    
+    Assert.Equal(5.0, mean, 1)
+    Assert.True(variance > 0.0)
+    Assert.True(stdDev > 0.0)
+
+[<Fact>]
+let ``C++ Function objects work correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use addFunc = CppFunction.CreateAdd()
+    use multFunc = CppFunction.CreateMultiply()
+    
+    Assert.Equal(7.0, addFunc.Call(3.0, 4.0))
+    Assert.Equal(12.0, multFunc.Call(3.0, 4.0))
+
+[<Fact>]  
+let ``C++ Matrix basic operations work`` () =
+    skipIfCppLibraryUnavailable()
+    use matrix = new CppMatrix(2, 2)
+    matrix.Set(0, 0, 1.0)
+    matrix.Set(0, 1, 2.0)
+    matrix.Set(1, 0, 3.0)
+    matrix.Set(1, 1, 4.0)
+    
+    Assert.Equal(2, matrix.Rows)
+    Assert.Equal(2, matrix.Cols)
+    Assert.Equal(1.0, matrix.Get(0, 0))
+    Assert.Equal(4.0, matrix.Get(1, 1))
