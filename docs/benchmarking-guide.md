@@ -1,6 +1,15 @@
 # Performance Benchmarking Guide
 
-This guide explains how to run performance benchmarks to compare C and C++ interop performance in F#.
+This guide explains how to run performance benchmarks comparing **F# vs C vs C++** implementations to understand the performance trade-offs between managed F# code and native libraries accessed via P/Invoke.
+
+## Overview
+
+The benchmark suite compares three approaches:
+- **F# (Managed)**: Pure F# implementations using .NET's built-in functions and data structures
+- **C (P/Invoke)**: Native C library functions called from F# via Platform Invoke
+- **C++ (P/Invoke)**: Modern C++ library functions with STL containers and templates, called from F# via P/Invoke
+
+This comparison helps you understand when P/Invoke overhead is justified and when native performance benefits outweigh the marshalling costs.
 
 ## Prerequisites
 
@@ -35,28 +44,28 @@ This will show an interactive menu with benchmark options.
 ### Benchmark Options
 
 #### 1. Full Performance Benchmarks
-Comprehensive benchmarking suite comparing C and C++ operations:
+Comprehensive benchmarking suite comparing F#, C, and C++ implementations:
 
-- **Basic Operations**: Integer addition, float multiplication
-- **Array Operations**: Summation, sorting 
-- **String Operations**: Length calculation, manipulation
-- **Mathematical Operations**: Statistical calculations (mean, variance, standard deviation)
-- **Memory Management**: Allocation/deallocation patterns
-- **Function Objects**: C++ lambda and function object performance
+- **Basic Operations**: F# arithmetic vs C integer operations vs C++ template operations
+- **Array Operations**: F# Array functions vs C array processing vs C++ STL vectors  
+- **String Operations**: F# string handling vs C char* operations vs C++ std::string
+- **Mathematical Operations**: F# Array.average vs C calculations vs C++ statistical functions
+- **Memory Management**: F# managed arrays vs C malloc/free vs C++ smart pointers
+- **Function Objects**: F# function values vs C function pointers vs C++ lambdas
 
-**Output**: Detailed statistics including mean execution time, standard deviation, memory allocation, and percentile distributions.
+**Output**: Detailed comparison showing F# as baseline, with relative performance of C and C++ approaches.
 
 #### 2. Micro Benchmarks  
 Scaled performance tests with varying array sizes (10, 100, 1000, 10000 elements):
 
-- Array sum operations (C)
-- Mathematical mean calculations (C++)
-- Variance calculations (C++)
+- F# Array.sum vs C array summation vs C++ vector operations
+- F# Array.average vs C++ mathematical mean calculations
+- F# variance calculations vs C++ template-based variance
 
-**Output**: Performance scaling analysis showing how operations perform with different data sizes.
+**Output**: Performance scaling analysis showing how F#, C, and C++ perform with different data sizes.
 
 #### 3. Quick Performance Test
-Fast performance check without statistical analysis - useful for quick verification.
+Fast performance comparison without statistical analysis - useful for quick verification of F# vs C vs C++ performance characteristics.
 
 ### Command Line Options
 
@@ -87,38 +96,50 @@ dotnet run -c Release -- --job short --warmupCount 3 --iterationCount 5
 ### Sample Output
 
 ```
-| Method                                          | Mean      | Error    | StdDev   | Allocated |
-|------------------------------------------------ |----------:|---------:|---------:|----------:|
-| C: Integer Addition (1000 calls)               |  12.34 μs | 0.45 μs  | 0.23 μs  |         - |
-| C: Float Multiplication (1000 calls)           |  15.67 μs | 0.52 μs  | 0.31 μs  |         - |
-| C++: Mathematical Mean (1000 element array)    |  89.12 μs | 2.34 μs  | 1.45 μs  |         - |
-| C++: Vector Operations (Add + Sum)              |  45.78 μs | 1.23 μs  | 0.89 μs  |    1024 B |
+| Method                                          | Mean      | Error    | StdDev   | Ratio | Allocated |
+|------------------------------------------------ |----------:|---------:|---------:|------:|----------:|
+| F#: Integer Addition (1000 calls)              |  8.45 μs  | 0.12 μs  | 0.08 μs  |  1.00 |         - |
+| C: Integer Addition (1000 calls)               | 12.34 μs  | 0.45 μs  | 0.23 μs  |  1.46 |         - |
+| F#: Array Sum (100 elements)                   |  0.89 μs  | 0.02 μs  | 0.01 μs  |  1.00 |         - |
+| C: Array Sum (100 elements)                    |  2.15 μs  | 0.08 μs  | 0.05 μs  |  2.42 |         - |
+| F#: Mathematical Mean (1000 element array)     | 45.67 μs  | 1.12 μs  | 0.67 μs  |  1.00 |         - |
+| C++: Mathematical Mean (1000 element array)    | 89.12 μs  | 2.34 μs  | 1.45 μs  |  1.95 |         - |
+| F#: List Operations (Add + Sum)                | 23.45 μs  | 0.67 μs  | 0.34 μs  |  1.00 |    1024 B |
+| C++: Vector Operations (Add + Sum)              | 45.78 μs  | 1.23 μs  | 0.89 μs  |  1.95 |    1024 B |
 ```
 
 ### Interpreting Results
 
 - **Lower Mean = Better Performance**
 - **Lower StdDev = More Consistent Performance**  
+- **Ratio Column**: Shows performance relative to F# baseline (F# = 1.00)
 - **Lower Allocated = Less Memory Usage**
-- **Compare similar operations** (e.g., C array sum vs C++ vector sum)
+- **Compare equivalent operations** (e.g., F# Array.sum vs C array_sum vs C++ vector.Sum())
 
 ## Expected Performance Characteristics
 
+### F# (Managed Code)
+- **Strengths**: No marshalling overhead, JIT optimizations, built-in collection operations
+- **Best for**: Most general-purpose operations, when safety and productivity matter more than raw speed
+- **Considerations**: GC pressure with large allocations, less control over memory layout
+
 ### C Library Operations
-- **Strengths**: Minimal overhead, direct memory access, simple operations
-- **Best for**: Basic arithmetic, array processing, low-level operations
+- **Strengths**: Minimal overhead, direct memory access, highly optimized algorithms
+- **Trade-offs**: P/Invoke marshalling costs, less type safety
+- **Best for**: Compute-intensive operations where P/Invoke overhead is amortized
 
 ### C++ Library Operations  
-- **Strengths**: Rich functionality, safe memory management, template optimizations
-- **Trade-offs**: Some overhead from object creation, RAII patterns
-- **Best for**: Complex operations, mathematical computations, resource management
+- **Strengths**: Modern language features, template optimizations, RAII safety
+- **Trade-offs**: Object creation overhead, P/Invoke complexity, larger binary size
+- **Best for**: Complex algorithms requiring both performance and modern C++ safety features
 
-### General Observations
+### General Performance Patterns
 
-1. **Simple Operations**: C typically faster due to minimal overhead
-2. **Complex Operations**: C++ may be competitive or faster due to optimizations
-3. **Memory Management**: C++ shows allocations but provides safety guarantees
-4. **Function Objects**: Surprisingly performant due to compiler optimizations
+1. **Simple Operations**: F# often competitive or faster due to no marshalling overhead
+2. **Array/Collection Processing**: F# built-ins are highly optimized and hard to beat
+3. **Mathematical Computations**: C/C++ advantage grows with computation complexity
+4. **String Operations**: F# string handling often faster than C char* marshalling
+5. **Memory-Intensive**: C/C++ advantages with large datasets and custom memory management
 
 ## Advanced Usage
 

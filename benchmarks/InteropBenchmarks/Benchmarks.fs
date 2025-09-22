@@ -43,13 +43,27 @@ type InteropPerformanceBenchmarks() =
         | Some s -> (s :> IDisposable).Dispose()
         | None -> ()
 
-    // Basic arithmetic benchmarks - C vs C++
+    // Basic arithmetic benchmarks - F# vs C vs C++
+    [<Benchmark(Description = "F#: Integer Addition (1000 calls)", Baseline = true)>]
+    member this.FSharpIntegerAddition() =
+        let mutable sum = 0
+        for i in 1..1000 do
+            sum <- sum + (i + (i + 1))
+        sum
+
     [<Benchmark(Description = "C: Integer Addition (1000 calls)")>]
     member this.CIntegerAddition() =
         let mutable sum = 0
         for i in 1..1000 do
             sum <- sum + add_integers(i, i + 1)
         sum
+
+    [<Benchmark(Description = "F#: Float Multiplication (1000 calls)")>]
+    member this.FSharpFloatMultiplication() =
+        let mutable result = 0.0f
+        for i in 1..1000 do
+            result <- result + (float32 i * 2.0f)
+        result
 
     [<Benchmark(Description = "C: Float Multiplication (1000 calls)")>]  
     member this.CFloatMultiplication() =
@@ -58,12 +72,23 @@ type InteropPerformanceBenchmarks() =
             result <- result + multiply_floats(float32 i, 2.0f)
         result
 
+    [<Benchmark(Description = "F#: Mathematical Mean (1000 element array)")>]
+    member this.FSharpMathematicalMean() =
+        Array.average testData
+
     [<Benchmark(Description = "C++: Mathematical Mean (1000 element array)")>]
     member this.CppMathematicalMean() =
         try
             calculate_mean_double(testData, testData.Length)
         with
         | _ -> 0.0
+
+    [<Benchmark(Description = "F#: Statistical Operations (variance + std dev)")>]
+    member this.FSharpStatisticalOperations() =
+        let mean = Array.average testData
+        let variance = testData |> Array.map (fun x -> (x - mean) ** 2.0) |> Array.average
+        let stdDev = sqrt variance
+        variance + stdDev
 
     [<Benchmark(Description = "C++: Statistical Operations (variance + std dev)")>]
     member this.CppStatisticalOperations() =
@@ -74,16 +99,32 @@ type InteropPerformanceBenchmarks() =
         with
         | _ -> 0.0
 
-    // Array operations benchmarks
+    // Array operations benchmarks - F# vs C vs C++
+    [<Benchmark(Description = "F#: Array Sum (100 elements)")>]
+    member this.FSharpArraySum() =
+        Array.sum intArray
+
     [<Benchmark(Description = "C: Array Sum (100 elements)")>]
     member this.CArraySum() =
         sum_array(intArray, intArray.Length)
+
+    [<Benchmark(Description = "F#: Array Sort (100 elements)")>]
+    member this.FSharpArraySort() =
+        let arrayCopy = Array.copy intArray
+        Array.sortInPlace arrayCopy
+        arrayCopy.[0] // Return first element to ensure work is done
 
     [<Benchmark(Description = "C: Array Sort (100 elements)")>]
     member this.CArraySort() =
         let arrayCopy = Array.copy intArray
         sort_array(arrayCopy, arrayCopy.Length)
         arrayCopy.[0] // Return first element to ensure work is done
+
+    [<Benchmark(Description = "F#: List Operations (Add + Sum)")>]
+    member this.FSharpListOperations() =
+        let mutableList = ResizeArray<int>()
+        for i in 1..100 do mutableList.Add(i)
+        mutableList |> Seq.sum
 
     [<Benchmark(Description = "C++: Vector Operations (Add + Sum)")>]
     member this.CppVectorOperations() =
@@ -96,6 +137,14 @@ type InteropPerformanceBenchmarks() =
             | None -> 0
         with
         | _ -> 0
+
+    [<Benchmark(Description = "F#: List Sort Operations")>]
+    member this.FSharpListSort() =
+        let mutableList = ResizeArray<int>()
+        // Add elements in reverse order
+        for i in [100..-1..1] do mutableList.Add(i)
+        mutableList.Sort()
+        mutableList.[0] // Return first element
 
     [<Benchmark(Description = "C++: Vector Sort Operations")>]
     member this.CppVectorSort() =
@@ -111,13 +160,30 @@ type InteropPerformanceBenchmarks() =
         with
         | _ -> 0
 
-    // String operations benchmarks
+    // String operations benchmarks - F# vs C vs C++
+    [<Benchmark(Description = "F#: String Operations (1000 calls)")>]
+    member this.FSharpStringOperations() =
+        let mutable totalLength = 0
+        for i in 1..1000 do
+            let testStr = sprintf "Test%d" i
+            totalLength <- totalLength + testStr.Length
+        totalLength
+
     [<Benchmark(Description = "C: String Operations (1000 calls)")>]
     member this.CStringOperations() =
         let mutable totalLength = 0
         for i in 1..1000 do
             let testStr = sprintf "Test%d" i
             totalLength <- totalLength + string_length(testStr)
+        totalLength
+
+    [<Benchmark(Description = "F#: String Building (Append + Length)")>]
+    member this.FSharpStringBuilding() =
+        let sb = System.Text.StringBuilder()
+        let mutable totalLength = 0
+        for i in 1..100 do
+            sb.Append(sprintf "%d" i) |> ignore
+            totalLength <- totalLength + sb.Length
         totalLength
 
     [<Benchmark(Description = "C++: String Operations (Append + Length)")>]
@@ -134,7 +200,17 @@ type InteropPerformanceBenchmarks() =
         with
         | _ -> 0
 
-    // Function call overhead benchmarks
+    // Function call overhead benchmarks - F# vs C++
+    [<Benchmark(Description = "F#: Function Calls (1000 operations)")>]
+    member this.FSharpFunctionCalls() =
+        let add = fun (a: float) (b: float) -> a + b
+        let multiply = fun (a: float) (b: float) -> a * b
+        let mutable result = 0.0
+        for i in 1..500 do
+            result <- result + add (float i) 1.0
+            result <- result + multiply (float i) 2.0
+        result
+
     [<Benchmark(Description = "C++: Function Object Calls (1000 operations)")>]
     member this.CppFunctionObjectCalls() =
         try
@@ -148,7 +224,15 @@ type InteropPerformanceBenchmarks() =
         with
         | _ -> 0.0
 
-    // Memory management benchmarks  
+    // Memory management benchmarks - F# vs C vs C++
+    [<Benchmark(Description = "F#: Memory Management (100 cycles)")>]
+    member this.FSharpMemoryManagement() =
+        let mutable totalAllocated = 0
+        for i in 1..100 do
+            let buffer = Array.zeroCreate<byte> 256
+            totalAllocated <- totalAllocated + buffer.Length
+        totalAllocated
+
     [<Benchmark(Description = "C: Memory Allocation/Deallocation (100 cycles)")>]
     member this.CMemoryManagement() =
         let mutable totalAllocated = 0
@@ -157,6 +241,16 @@ type InteropPerformanceBenchmarks() =
                 totalAllocated <- totalAllocated + 256
             )
         totalAllocated
+
+    [<Benchmark(Description = "F#: Managed Resource Management (100 cycles)")>]
+    member this.FSharpManagedResourceManagement() =
+        let mutable totalSize = 0
+        for i in 1..100 do
+            let matrix = Array2D.zeroCreate<float> 2 2
+            matrix.[0, 0] <- float i
+            matrix.[1, 1] <- float i
+            totalSize <- totalSize + (Array2D.length1 matrix * Array2D.length2 matrix)
+        totalSize
 
     [<Benchmark(Description = "C++: Smart Resource Management (100 cycles)")>]
     member this.CppSmartResourceManagement() =
@@ -194,9 +288,17 @@ type MicroBenchmarks() =
         testArray <- Array.init this.ArraySize id
         testDoubleArray <- Array.init this.ArraySize float
 
+    [<Benchmark(Baseline = true)>]
+    member this.FSharpArraySumScaled() =
+        Array.sum testArray
+
     [<Benchmark>]
     member this.CArraySumScaled() =
         sum_array(testArray, testArray.Length)
+
+    [<Benchmark>]
+    member this.FSharpMathMeanScaled() =
+        Array.average testDoubleArray
 
     [<Benchmark>]
     member this.CppMathMeanScaled() =
@@ -204,6 +306,11 @@ type MicroBenchmarks() =
             calculate_mean_double(testDoubleArray, testDoubleArray.Length)
         with
         | _ -> 0.0
+
+    [<Benchmark>]
+    member this.FSharpVarianceScaled() =
+        let mean = Array.average testDoubleArray
+        testDoubleArray |> Array.map (fun x -> (x - mean) ** 2.0) |> Array.average
 
     [<Benchmark>]
     member this.CppVarianceScaled() =
