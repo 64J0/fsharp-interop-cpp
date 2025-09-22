@@ -238,6 +238,11 @@ This project provides a solid foundation for more complex scenarios:
 3. **Performance Optimization**: Bulk operations, streaming data
 4. **Cross-Platform Support**: Windows DLL support, macOS dylib support
 
+## Related projects
+
+- [simdjson/simdjson](https://github.com/simdjson/simdjson) (simdjson [docs](https://simdjson.github.io/simdjson/md_doc_basics.html)) --> [EgorBo/SimdJsonSharp](https://github.com/EgorBo/SimdJsonSharp). C# bindings for lemire/simdjson (and full C# port).
+- [speakeztech/Farscape](https://github.com/speakeztech/Farscape).Farscape is a command-line tool that aims to automatically generate idiomatic F# bindings for C/C++ libraries, preserving F# intrinsics.
+
 ## Contributing
 
 Feel free to extend this example with additional scenarios or improvements. Some ideas:
