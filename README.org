@@ -1,0 +1,77 @@
+#+TITLE: F# interop with C++
+#+DATE: [2025-09-18 Thu]
+
+Integrating C++ with F# is a powerful technique for leveraging high-performance,
+platform-specific, or legacy code. The process revolves around *Platform Invoke
+(P/Invoke)*, a .NET feature that allows managed code (like F#) to call unmanaged
+functions in a Dynamic Link Library (DLL). Using ~g++~ on platforms like Linux
+or macOS requires specific compiler flags to create a shared library that .NET
+can recognize.
+
+Example projects:
+
+- [[https://github.com/simdjson/simdjson][simdjson/simdjson]] (simdjson [[https://simdjson.github.io/simdjson/md_doc_basics.html][docs]]) --> [[https://github.com/EgorBo/SimdJsonSharp][EgorBo/SimdJsonSharp]]
+
+** Step 1: Create the C++ Shared Library
+
+The first step is to write your C++ code and compile it into a shared
+library. For a ~.NET~ application, a ~.dll~ extension is standard on Windows,
+but on Linux, the convention is a ~.so~ (shared object) file, and on macOS, it's
+a ~.dylib~ file. The core concept remains the same: expose C-style functions.
+
+*** Write the C++ Code
+
+You need to declare the functions you want to export. The ~extern "C"~ linkage
+specifier is crucial as it tells ~g++~ to use the C calling convention and
+disable C++'s name mangling, which makes function names readable and callable
+from F#.
+
+*** Compile with g++
+
+You need to use specific flags to create a shared library. The ~-shared~ flag
+tells ~g++~ to create a shared object, and the ~-fPIC~ (Position-Independent
+Code) flag is essential for creating code that can be loaded at an arbitrary
+memory address, which is a requirement for shared libraries.
+
+#+BEGIN_SRC bash
+  g++ -shared -fPIC MyLibrary.cpp -o libMyLibrary.so
+#+END_SRC
+
+- ~g++~: The GNU C++ compiler.
+- ~-shared~: Creates a shared library instead of an executable.
+- ~-fPIC~: Generates position-independent code, a requirement for shared
+  libraries on most modern systems.
+- ~-o libMyLibrary.so~: Specifies the output filename. The ~lib~ prefix and
+  ~.so~ extension are the standard Linux conventions.
+
+-----
+
+** Step 2: Use the Shared Library in F#
+
+Now that you have your C++ shared library, you can create an F# project and
+reference it using *P/Invoke*.
+
+You'll use the ~[<DllImport>]~ attribute to declare F# functions that map to
+your C++ functions. The runtime handles the heavy lifting of finding the library
+and invoking the code.
+
+Note that the ~DllImport~ attribute takes the library name without the ~lib~
+prefix or file extension. The .NET runtime automatically adds the
+platform-specific prefixes and suffixes (e.g., ~lib~ and ~.so~ on Linux).
+
+** Using the Makefile
+
+- ~make~: Runs the default target, which is ~all~, to build both projects and
+  then run the F# application.
+- ~make build_cpp~: Compiles only the C++ shared library.
+- ~make clean~: Removes all compiled files and cleans the directories.
+
+This Makefile automates the entire process, making it much easier to manage the
+interop solution.
+
+** Other low-level projects
+
+- [[https://github.com/64J0/samples--assembly][64J0/samples--assembly]]
+- [[https://github.com/64J0/samples--il][64J0/samples--il]]
+- [[https://github.com/64J0/fsharp--simd-vector-addition][64J0/fsharp--simd-vector-addition]]
+- [[https://github.com/64J0/starting-eBPF][64J0/starting-eBPF]]
