@@ -98,13 +98,13 @@ dotnet run -c Release -- --job short --warmupCount 3 --iterationCount 5
 ```
 | Method                                          | Mean      | Error    | StdDev   | Ratio | Allocated |
 |------------------------------------------------ |----------:|---------:|---------:|------:|----------:|
-| F#: Integer Addition (1000 calls)              |  8.45 μs  | 0.12 μs  | 0.08 μs  |  1.00 |         - |
-| C: Integer Addition (1000 calls)               | 12.34 μs  | 0.45 μs  | 0.23 μs  |  1.46 |         - |
-| F#: Array Sum (100 elements)                   |  0.89 μs  | 0.02 μs  | 0.01 μs  |  1.00 |         - |
-| C: Array Sum (100 elements)                    |  2.15 μs  | 0.08 μs  | 0.05 μs  |  2.42 |         - |
-| F#: Mathematical Mean (1000 element array)     | 45.67 μs  | 1.12 μs  | 0.67 μs  |  1.00 |         - |
-| C++: Mathematical Mean (1000 element array)    | 89.12 μs  | 2.34 μs  | 1.45 μs  |  1.95 |         - |
-| F#: List Operations (Add + Sum)                | 23.45 μs  | 0.67 μs  | 0.34 μs  |  1.00 |    1024 B |
+| F#: Integer Addition (1000 calls)               |  8.45 μs  | 0.12 μs  | 0.08 μs  |  1.00 |         - |
+| C: Integer Addition (1000 calls)                | 12.34 μs  | 0.45 μs  | 0.23 μs  |  1.46 |         - |
+| F#: Array Sum (100 elements)                    |  0.89 μs  | 0.02 μs  | 0.01 μs  |  1.00 |         - |
+| C: Array Sum (100 elements)                     |  2.15 μs  | 0.08 μs  | 0.05 μs  |  2.42 |         - |
+| F#: Mathematical Mean (1000 element array)      | 45.67 μs  | 1.12 μs  | 0.67 μs  |  1.00 |         - |
+| C++: Mathematical Mean (1000 element array)     | 89.12 μs  | 2.34 μs  | 1.45 μs  |  1.95 |         - |
+| F#: List Operations (Add + Sum)                 | 23.45 μs  | 0.67 μs  | 0.34 μs  |  1.00 |    1024 B |
 | C++: Vector Operations (Add + Sum)              | 45.78 μs  | 1.23 μs  | 0.89 μs  |  1.95 |    1024 B |
 ```
 

@@ -82,16 +82,18 @@ F# and C++ Interop Demo
 
 ```
 ├── src/
-│   ├── cpp/                    # C++ native library
-│   │   ├── math_operations.h   # C function declarations
-│   │   └── math_operations.c   # C function implementations
-│   └── fsharp/FSharpCppInterop/# F# console application
+│   ├── cpp/                          # C++ native library
+│   │   ├── math_operations.h         # C function declarations
+│   │   ├── cpp_operations.h          # C++ function declarations
+│   │   ├── cpp_operations.cpp        # C++ function implementations
+│   │   └── math_operations.c         # C function implementations
+│   └── fsharp/FSharpCppInterop/      # F# console application
 │       ├── MathOperationsInterop.fs  # P/Invoke declarations
-│       └── Program.fs          # Demo application
-├── tests/InteropTests/         # Unit tests
-├── docs/                       # Detailed documentation
-├── Makefile                    # C++ build system
-└── README.md                   # Comprehensive documentation
+│       └── Program.fs                # Demo application
+├── tests/InteropTests/               # Unit tests
+├── docs/                             # Detailed documentation
+├── Makefile                          # C++ build system
+└── README.md                         # Comprehensive documentation
 ```
 
 ## Key Concepts at a Glance
