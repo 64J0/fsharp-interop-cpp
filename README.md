@@ -1,24 +1,26 @@
-# F# and C++ Interop Sample Project
+# F# and C/C++ Interop Sample Project
 
-This project demonstrates comprehensive interoperability between F# and C++ using Platform Invoke (P/Invoke). It showcases various scenarios commonly encountered when integrating F# applications with native C++ libraries.
+This project demonstrates comprehensive interoperability between F# and C/C++ using Platform Invoke (P/Invoke). It showcases various scenarios commonly encountered when integrating F# applications with native C/C++ libraries.
 
 ## Project Structure
 
 ```
 ├── src/
-│   ├── cpp/                    # C++ library source code
-│   │   ├── math_operations.h   # Header file with function declarations
-│   │   └── math_operations.c   # Implementation of C functions
-│   └── fsharp/                 # F# application
-│       └── FSharpCppInterop/   # F# console application
+│   ├── cpp/                              # C and C++ library source code
+│   │   ├── math_operations.h             # Header file with function declarations
+│   │   ├── cpp_operations.h              # Header file with function declarations
+│   │   ├── cpp_operations.cpp            # Implementation of C++ functions
+│   │   └── math_operations.c             # Implementation of C functions
+│   └── fsharp/                           # F# application
+│       └── FSharpCppInterop/             # F# console application
 │           ├── MathOperationsInterop.fs  # P/Invoke declarations
-│           ├── Program.fs      # Demo application
+│           ├── Program.fs                # Demo application
 │           └── FSharpCppInterop.fsproj
 ├── tests/
-│   └── InteropTests/           # Unit tests for interop functionality
-├── docs/                       # Additional documentation
-├── Makefile                    # Build system for C++ library
-├── README.md                   # This file
+│   └── InteropTests/                     # Unit tests for interop functionality
+├── docs/                                 # Additional documentation
+├── Makefile                              # Build system for C++ library
+├── README.md                             # This file
 └── LICENSE
 ```
 
