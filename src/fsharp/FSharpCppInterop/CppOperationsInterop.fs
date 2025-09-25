@@ -257,8 +257,8 @@ type CppMatrix(rows: int, cols: int) =
             None
     
     // Private constructor for matrices created from native operations
-    private new(nativeHandle: IntPtr) as this = 
-        CppMatrix(0, 0) then
+    private new(nativeHandle: IntPtr) = 
+        new CppMatrix(0, 0) then
         // This is a bit of a hack, but we need to replace the handle
         // In a production system, you'd want a cleaner design
         ()
