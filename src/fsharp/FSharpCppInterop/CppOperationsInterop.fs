@@ -226,14 +226,14 @@ type CppString(initial: string) =
                 string_destroy(handle)
                 disposed <- true
 
-type CppMatrix private (handle: IntPtr, shouldDestroy: bool) =
+type CppMatrix private (handle: IntPtr) =
     let mutable disposed = false
     
     // Public constructor
     new(rows: int, cols: int) = 
         let h = matrix_create(rows, cols)
         if h = IntPtr.Zero then failwith "Failed to create matrix"
-        new CppMatrix(h, true)
+        new CppMatrix(h)
     
     member _.Handle = 
         if disposed then failwith "Matrix has been disposed"
@@ -248,14 +248,14 @@ type CppMatrix private (handle: IntPtr, shouldDestroy: bool) =
     member _.Multiply(other: CppMatrix) =
         let resultHandle = matrix_multiply(handle, other.Handle)
         if resultHandle <> IntPtr.Zero then
-            Some (new CppMatrix(resultHandle, true))
+            Some (new CppMatrix(resultHandle))
         else
             None
     
     member _.Transpose() =
         let resultHandle = matrix_transpose(handle)
         if resultHandle <> IntPtr.Zero then
-            Some (new CppMatrix(resultHandle, true))
+            Some (new CppMatrix(resultHandle))
         else
             None
     
