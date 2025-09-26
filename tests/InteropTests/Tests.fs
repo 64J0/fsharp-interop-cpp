@@ -212,3 +212,237 @@ let ``C++ Matrix basic operations work`` () =
     Assert.Equal(2, matrix.Cols)
     Assert.Equal(1.0, matrix.Get(0, 0))
     Assert.Equal(4.0, matrix.Get(1, 1))
+
+[<Fact>]
+let ``C++ Matrix multiplication works correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use matrix1 = new CppMatrix(2, 3)
+    matrix1.Set(0, 0, 1.0)
+    matrix1.Set(0, 1, 2.0)
+    matrix1.Set(0, 2, 3.0)
+    matrix1.Set(1, 0, 4.0)
+    matrix1.Set(1, 1, 5.0)
+    matrix1.Set(1, 2, 6.0)
+    
+    use matrix2 = new CppMatrix(3, 2)
+    matrix2.Set(0, 0, 1.0)
+    matrix2.Set(0, 1, 2.0)
+    matrix2.Set(1, 0, 3.0)
+    matrix2.Set(1, 1, 4.0)
+    matrix2.Set(2, 0, 5.0)
+    matrix2.Set(2, 1, 6.0)
+    
+    match matrix1.Multiply(matrix2) with
+    | Some result ->
+        use resultMatrix = result
+        Assert.Equal(2, resultMatrix.Rows)
+        Assert.Equal(2, resultMatrix.Cols)
+        // Expected result: [[22, 28], [49, 64]]
+        Assert.Equal(22.0, resultMatrix.Get(0, 0))
+        Assert.Equal(28.0, resultMatrix.Get(0, 1))
+        Assert.Equal(49.0, resultMatrix.Get(1, 0))
+        Assert.Equal(64.0, resultMatrix.Get(1, 1))
+    | None ->
+        Assert.True(false, "Matrix multiplication should not fail")
+
+[<Fact>]
+let ``C++ Matrix multiplication with square matrices`` () =
+    skipIfCppLibraryUnavailable()
+    use matrix1 = new CppMatrix(2, 2)
+    matrix1.Set(0, 0, 2.0)
+    matrix1.Set(0, 1, 3.0)
+    matrix1.Set(1, 0, 1.0)
+    matrix1.Set(1, 1, 4.0)
+    
+    use matrix2 = new CppMatrix(2, 2)
+    matrix2.Set(0, 0, 1.0)
+    matrix2.Set(0, 1, 0.0)
+    matrix2.Set(1, 0, 0.0)
+    matrix2.Set(1, 1, 1.0)
+    
+    match matrix1.Multiply(matrix2) with
+    | Some result ->
+        use resultMatrix = result
+        Assert.Equal(2, resultMatrix.Rows)
+        Assert.Equal(2, resultMatrix.Cols)
+        // Expected result: [[2, 3], [1, 4]] (identity multiplication)
+        Assert.Equal(2.0, resultMatrix.Get(0, 0))
+        Assert.Equal(3.0, resultMatrix.Get(0, 1))
+        Assert.Equal(1.0, resultMatrix.Get(1, 0))
+        Assert.Equal(4.0, resultMatrix.Get(1, 1))
+    | None ->
+        Assert.True(false, "Matrix multiplication should not fail")
+
+[<Fact>]
+let ``C++ Matrix multiplication with incompatible dimensions`` () =
+    skipIfCppLibraryUnavailable()
+    use matrix1 = new CppMatrix(2, 3)
+    use matrix2 = new CppMatrix(2, 2) // Incompatible: 2x3 * 2x2 (should be 2x3 * 3x2)
+    
+    match matrix1.Multiply(matrix2) with
+    | Some _ ->
+        Assert.True(false, "Matrix multiplication should fail with incompatible dimensions")
+    | None ->
+        Assert.True(true) // Expected behavior
+
+[<Fact>]
+let ``C++ Matrix transpose works correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use matrix = new CppMatrix(2, 3)
+    matrix.Set(0, 0, 1.0)
+    matrix.Set(0, 1, 2.0)
+    matrix.Set(0, 2, 3.0)
+    matrix.Set(1, 0, 4.0)
+    matrix.Set(1, 1, 5.0)
+    matrix.Set(1, 2, 6.0)
+    
+    match matrix.Transpose() with
+    | Some transposed ->
+        use transposeMatrix = transposed
+        Assert.Equal(3, transposeMatrix.Rows)
+        Assert.Equal(2, transposeMatrix.Cols)
+        
+        // Expected result: [[1, 4], [2, 5], [3, 6]]
+        Assert.Equal(1.0, transposeMatrix.Get(0, 0))
+        Assert.Equal(4.0, transposeMatrix.Get(0, 1))
+        Assert.Equal(2.0, transposeMatrix.Get(1, 0))
+        Assert.Equal(5.0, transposeMatrix.Get(1, 1))
+        Assert.Equal(3.0, transposeMatrix.Get(2, 0))
+        Assert.Equal(6.0, transposeMatrix.Get(2, 1))
+    | None ->
+        Assert.True(false, "Matrix transpose should not fail")
+
+[<Fact>]
+let ``C++ Matrix square transpose works correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use matrix = new CppMatrix(2, 2)
+    matrix.Set(0, 0, 1.0)
+    matrix.Set(0, 1, 2.0)
+    matrix.Set(1, 0, 3.0)
+    matrix.Set(1, 1, 4.0)
+    
+    match matrix.Transpose() with
+    | Some transposed ->
+        use transposeMatrix = transposed
+        Assert.Equal(2, transposeMatrix.Rows)
+        Assert.Equal(2, transposeMatrix.Cols)
+        
+        // Expected result: [[1, 3], [2, 4]]
+        Assert.Equal(1.0, transposeMatrix.Get(0, 0))
+        Assert.Equal(3.0, transposeMatrix.Get(0, 1))
+        Assert.Equal(2.0, transposeMatrix.Get(1, 0))
+        Assert.Equal(4.0, transposeMatrix.Get(1, 1))
+    | None ->
+        Assert.True(false, "Matrix transpose should not fail")
+
+[<Fact>]
+let ``C++ Vector safe access works correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use vector = new CppVector()
+    vector.Add(10)
+    vector.Add(20)
+    vector.Add(30)
+    
+    // Test valid access
+    match vector.SafeGet(1) with
+    | Some value -> Assert.Equal(20, value)
+    | None -> Assert.True(false, "Safe access should return value for valid index")
+    
+    // Test invalid access
+    match vector.SafeGet(10) with
+    | Some _ -> Assert.True(false, "Safe access should return None for invalid index")
+    | None -> Assert.True(true) // Expected behavior
+
+[<Fact>]
+let ``C++ Vector sorting works correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use vector = new CppVector()
+    vector.Add(5)
+    vector.Add(2)
+    vector.Add(8)
+    vector.Add(1)
+    
+    vector.Sort()
+    
+    Assert.Equal(1, vector.Get(0))
+    Assert.Equal(2, vector.Get(1))
+    Assert.Equal(5, vector.Get(2))
+    Assert.Equal(8, vector.Get(3))
+
+[<Fact>]
+let ``C++ String manipulation operations work correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use str = new CppString("Hello")
+    
+    str.Prepend("Hi ")
+    Assert.Equal("Hi Hello", str.Value)
+    
+    str.Reverse()
+    Assert.Equal("olleH iH", str.Value)
+    
+    str.ToLower()
+    Assert.Contains("h", str.Value.ToLower())
+
+[<Fact>]
+let ``C++ Mathematical operations with edge cases`` () =
+    skipIfCppLibraryUnavailable()
+    // Test with single value
+    let singleValue = [| 5.0 |]
+    let (mean, variance, stdDev) = calculateStatistics(singleValue)
+    
+    Assert.Equal(5.0, mean, 1)
+    Assert.Equal(0.0, variance, 1) // Variance of single value is 0
+    Assert.Equal(0.0, stdDev, 1)   // Standard deviation of single value is 0
+
+[<Fact>]
+let ``C++ Function power operation works correctly`` () =
+    skipIfCppLibraryUnavailable()
+    use powerFunc = CppFunction.CreatePower()
+    
+    Assert.Equal(8.0, powerFunc.Call(2.0, 3.0))  // 2^3 = 8
+    Assert.Equal(1.0, powerFunc.Call(5.0, 0.0))  // 5^0 = 1
+    Assert.Equal(25.0, powerFunc.Call(5.0, 2.0)) // 5^2 = 25
+
+[<Fact>]
+let ``C++ Matrix creation with different sizes`` () =
+    skipIfCppLibraryUnavailable()
+    // Test 1x1 matrix
+    use matrix1x1 = new CppMatrix(1, 1)
+    matrix1x1.Set(0, 0, 42.0)
+    Assert.Equal(1, matrix1x1.Rows)
+    Assert.Equal(1, matrix1x1.Cols)
+    Assert.Equal(42.0, matrix1x1.Get(0, 0))
+    
+    // Test larger matrix
+    use matrix5x3 = new CppMatrix(5, 3)
+    Assert.Equal(5, matrix5x3.Rows)
+    Assert.Equal(3, matrix5x3.Cols)
+    
+    // Test default values are 0
+    Assert.Equal(0.0, matrix5x3.Get(2, 1))
+
+[<Fact>]
+let ``C++ Matrix identity multiplication`` () =
+    skipIfCppLibraryUnavailable()
+    use identity = new CppMatrix(3, 3)
+    identity.Set(0, 0, 1.0)
+    identity.Set(1, 1, 1.0)
+    identity.Set(2, 2, 1.0)
+    
+    use testMatrix = new CppMatrix(3, 3)
+    testMatrix.Set(0, 0, 2.0)
+    testMatrix.Set(0, 1, 3.0)
+    testMatrix.Set(1, 0, 4.0)
+    testMatrix.Set(2, 2, 5.0)
+    
+    match testMatrix.Multiply(identity) with
+    | Some result ->
+        use resultMatrix = result
+        // Multiplying by identity should yield original matrix
+        Assert.Equal(2.0, resultMatrix.Get(0, 0))
+        Assert.Equal(3.0, resultMatrix.Get(0, 1))
+        Assert.Equal(4.0, resultMatrix.Get(1, 0))
+        Assert.Equal(5.0, resultMatrix.Get(2, 2))
+        Assert.Equal(0.0, resultMatrix.Get(1, 1)) // Should remain 0
+    | None ->
+        Assert.True(false, "Identity multiplication should not fail")
