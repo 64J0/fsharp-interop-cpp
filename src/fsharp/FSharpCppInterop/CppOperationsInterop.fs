@@ -226,11 +226,14 @@ type CppString(initial: string) =
                 string_destroy(handle)
                 disposed <- true
 
-type CppMatrix(rows: int, cols: int) =
-    let handle = matrix_create(rows, cols)
+type CppMatrix private (handle: IntPtr, shouldDestroy: bool) =
     let mutable disposed = false
     
-    do if handle = IntPtr.Zero then failwith "Failed to create matrix"
+    // Public constructor
+    new(rows: int, cols: int) = 
+        let h = matrix_create(rows, cols)
+        if h = IntPtr.Zero then failwith "Failed to create matrix"
+        new CppMatrix(h, true)
     
     member _.Handle = 
         if disposed then failwith "Matrix has been disposed"
@@ -245,23 +248,16 @@ type CppMatrix(rows: int, cols: int) =
     member _.Multiply(other: CppMatrix) =
         let resultHandle = matrix_multiply(handle, other.Handle)
         if resultHandle <> IntPtr.Zero then
-            Some (new CppMatrix(resultHandle))
+            Some (new CppMatrix(resultHandle, true))
         else
             None
     
     member _.Transpose() =
         let resultHandle = matrix_transpose(handle)
         if resultHandle <> IntPtr.Zero then
-            Some (new CppMatrix(resultHandle))
+            Some (new CppMatrix(resultHandle, true))
         else
             None
-    
-    // Private constructor for matrices created from native operations
-    private new(nativeHandle: IntPtr) = 
-        new CppMatrix(0, 0) then
-        // This is a bit of a hack, but we need to replace the handle
-        // In a production system, you'd want a cleaner design
-        ()
     
     interface IDisposable with
         member _.Dispose() =
