@@ -6,11 +6,12 @@ This project demonstrates comprehensive interoperability between F# and C/C++ us
 
 ```
 ├── src/
-│   ├── cpp/                              # C and C++ library source code
+│   ├── c/                                # C library source code
 │   │   ├── math_operations.h             # Header file with function declarations
-│   │   ├── cpp_operations.h              # Header file with function declarations
-│   │   ├── cpp_operations.cpp            # Implementation of C++ functions
 │   │   └── math_operations.c             # Implementation of C functions
+│   ├── cpp/                              # C++ library source code
+│   │   ├── cpp_operations.hpp            # Header file with function declarations
+│   │   └── cpp_operations.cpp            # Implementation of C++ functions
 │   └── fsharp/                           # F# application
 │       └── FSharpCppInterop/             # F# console application
 │           ├── MathOperationsInterop.fs  # P/Invoke declarations

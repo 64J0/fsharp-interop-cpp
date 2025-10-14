@@ -82,11 +82,12 @@ F# and C++ Interop Demo
 
 ```
 ├── src/
-│   ├── cpp/                          # C++ native library
+│   ├── c/                            # C native library
 │   │   ├── math_operations.h         # C function declarations
-│   │   ├── cpp_operations.h          # C++ function declarations
-│   │   ├── cpp_operations.cpp        # C++ function implementations
 │   │   └── math_operations.c         # C function implementations
+│   ├── cpp/                          # C++ native library
+│   │   ├── cpp_operations.hpp        # C++ function declarations
+│   │   └── cpp_operations.cpp        # C++ function implementations
 │   └── fsharp/FSharpCppInterop/      # F# console application
 │       ├── MathOperationsInterop.fs  # P/Invoke declarations
 │       └── Program.fs                # Demo application
