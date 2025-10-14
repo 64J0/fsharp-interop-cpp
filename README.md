@@ -240,11 +240,12 @@ This project provides a solid foundation for more complex scenarios:
 3. **Performance Optimization**: Bulk operations, streaming data
 4. **Cross-Platform Support**: Windows DLL support, macOS dylib support
 
-## Related projects
+## Related projects and links
 
 - [simdjson/simdjson](https://github.com/simdjson/simdjson) (simdjson [docs](https://simdjson.github.io/simdjson/md_doc_basics.html)) --> [EgorBo/SimdJsonSharp](https://github.com/EgorBo/SimdJsonSharp). C# bindings for lemire/simdjson (and full C# port).
 - [speakeztech/Farscape](https://github.com/speakeztech/Farscape).Farscape is a command-line tool that aims to automatically generate idiomatic F# bindings for C/C++ libraries, preserving F# intrinsics.
 - [matthewcrews/OdinPerf](https://github.com/matthewcrews/OdinPerf). With this project, Matthew Crews (the Fast F# guy) makes a performance comparison between F# and Odin programs. There's also this interview where he exposes more about his opinion on this language vs F# considering the scenario he's working on: [Odin Newsletter - Interview with Crews](https://odin-lang.org/news/newsletter-2024-10/#interview-with-crews).
+- [[YouTube] dotnet/C++ Interoperability Within .NET](https://youtu.be/udIEiCAn15E)
 
 ## Contributing
 
