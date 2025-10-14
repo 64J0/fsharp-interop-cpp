@@ -47,3 +47,6 @@ TestResults/
 # NuGet
 *.nupkg
 .nuget/
+
+# Benchmark results
+benchmarks/InteropBenchmarks/BenchmarkDotNet.Artifacts/
