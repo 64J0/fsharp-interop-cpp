@@ -54,3 +54,76 @@ When working with C++ interop in this repository, follow these guidelines:
     - Optimize marshaling strategies based on benchmark results.
 
 By following these instructions, we aim to maintain clean, safe, and efficient interop code in this repository.
+
+## Repository Structure and Navigation
+
+This repository demonstrates F# and C/C++ interoperability using Platform Invoke (P/Invoke). Key directories:
+
+- **`src/c/`** - C library source code with header files
+- **`src/cpp/`** - C++ library source code with header files  
+- **`src/fsharp/FSharpCppInterop/`** - Main F# console application with P/Invoke declarations
+- **`tests/InteropTests/`** - xUnit tests for interop functionality
+- **`benchmarks/InteropBenchmarks/`** - BenchmarkDotNet performance comparisons
+- **`build/`** - Generated shared libraries (.so files)
+- **`docs/`** - Additional documentation
+
+## Development Environment and Setup
+
+### Prerequisites
+- **.NET 8.0 SDK** or later
+- **GCC or Clang** compiler for C/C++ libraries
+- **Make** for building native libraries
+- **Linux environment** (primary target platform)
+
+### Build Process
+1. **Build native libraries**: `make` (creates `build/libmath_operations.so` and `build/libcpp_operations.so`)
+2. **Build F# projects**: `dotnet build` (builds solution with all projects)
+3. **Set library path**: `export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH`
+
+### Testing and Validation
+- **Run unit tests**: `cd tests/InteropTests && dotnet test --verbosity minimal`
+- **Run benchmarks**: `cd benchmarks/InteropBenchmarks && dotnet run -c Release`
+- **Run demo**: `cd src/fsharp/FSharpCppInterop && dotnet run`
+- **Quick build/test**: Use `./build-and-run.sh` script for automated build and test
+
+### Linting and Code Quality
+- **C/C++ warnings**: Enabled via `-Wall -Wextra` in Makefile
+- **F# compiler**: Built-in static analysis and warnings
+- **All builds should complete without errors**
+
+## Common Development Tasks
+
+When making changes to this repository:
+
+1. **Adding new P/Invoke functions**:
+   - Add C/C++ implementation in appropriate source files
+   - Add P/Invoke declaration in F# interop modules
+   - Add corresponding unit tests
+   - Update documentation and examples
+
+2. **Modifying existing functionality**:
+   - Rebuild native libraries with `make clean && make`
+   - Rebuild F# projects with `dotnet build`
+   - Run full test suite to ensure compatibility
+   - Update benchmarks if performance-critical
+
+3. **Cross-platform considerations**:
+   - Use `.so` extension for Linux shared libraries
+   - Ensure calling convention compatibility (`CallingConvention.Cdecl`)
+   - Test library loading paths (`LD_LIBRARY_PATH`)
+
+## Key Files for Code Generation
+
+- **`MathOperationsInterop.fs`** - Primary P/Invoke declarations for C library
+- **`CppOperationsInterop.fs`** - P/Invoke declarations for C++ library
+- **`src/c/math_operations.h`** - C function signatures and data structures
+- **`src/cpp/cpp_operations.hpp`** - C++ function signatures and classes
+- **`Makefile`** - Build configuration for native libraries
+
+## Performance and Benchmarking
+
+This repository includes comprehensive performance analysis comparing F# managed code vs C P/Invoke vs C++ P/Invoke. When suggesting optimizations:
+- Consider marshalling overhead vs computational gains
+- Use `BenchmarkDotNet` attributes for new performance tests
+- Focus on memory safety without sacrificing performance
+- Document performance trade-offs in code comments
