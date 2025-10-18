@@ -2,6 +2,19 @@
 
 This project demonstrates comprehensive interoperability between F# and C/C++ using Platform Invoke (P/Invoke). It showcases various scenarios commonly encountered when integrating F# applications with native C/C++ libraries.
 
+> How does P/Invoke work?
+>
+> P/Invoke involves a couple of steps. These are the steps you must follow to use a Win32 API in a .NET application:
+>
+> 1. Find the API you want to use.
+> 2. Find the DLL the API resides in.
+> 3. Load that DLL in your assembly.
+> 4. Declare a stub that tells your application how to call that API.
+> 5. Convert the .NET data types into something the Win32 API can understand.
+> 6. Use the API.
+>
+> -- *Systems Programming with C# and .NET. 1st edition.*
+
 ## Project Structure
 
 ```
