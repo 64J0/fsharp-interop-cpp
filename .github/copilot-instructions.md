@@ -11,7 +11,7 @@ When working with C++ interop in this repository, follow these guidelines:
 1. **Use .NET P/Invoke Best Practices**:
     - Ensure proper marshaling of data types between managed and unmanaged code.
     - DO use `[<LibraryImport>]`, if possible, when targeting .NET 7+.
-  - There are cases when using `[DllImport]` is appropriate. A code analyzer with ID SYSLIB1054 tells you when that's the case.
+        - There are cases when using `[DllImport]` is appropriate. A code analyzer with ID `SYSLIB1054` tells you when that's the case.
     - DO use the same naming and capitalization for your methods and parameters as the native method you want to call.
     - CONSIDER using the same naming and capitalization for constant values.
     - DO define P/Invoke and function pointer signatures that match the C function's arguments.
