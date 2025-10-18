@@ -13,7 +13,12 @@ type LibMathOperations = class end
 [<Literal>]
 let LibraryName = "libmath_operations.so"
 
-// Basic primitive type operations
+// Note: While LibraryImport is preferred for .NET 7+, F# currently has runtime 
+// limitations with LibraryImport source generation. Additionally, most operations
+// require CallingConvention.Cdecl and CharSet.Ansi which have limited LibraryImport support.
+// Using DllImport ensures reliable F# interop while following other P/Invoke best practices.
+
+// Basic primitive type operations - DllImport required for F# runtime compatibility
 [<DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)>]
 extern int add_integers(int a, int b)
 

@@ -13,6 +13,9 @@ type LibCppOperations = class end
 [<Literal>]
 let CppLibraryName = "libcpp_operations.so"
 
+// Note: Using DllImport instead of LibraryImport due to F# runtime limitations
+// with source generation and requirement for CallingConvention.Cdecl support.
+
 // Vector operations
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
 extern IntPtr vector_create()
