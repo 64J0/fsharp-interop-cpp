@@ -28,13 +28,13 @@ extern int is_even(int number)
 
 // String operations with proper marshaling
 [<DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
-extern int string_length([<MarshalAs(UnmanagedType.LPStr)>] string str)
+extern int string_length(string str)
 
 [<DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
-extern void copy_string([<MarshalAs(UnmanagedType.LPStr)>] string source, StringBuilder destination, int max_length)
+extern void copy_string(string source, StringBuilder destination, int max_length)
 
 [<DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
-extern IntPtr get_greeting([<MarshalAs(UnmanagedType.LPStr)>] string name)
+extern IntPtr get_greeting(string name)
 
 // Struct operations
 [<Struct>]

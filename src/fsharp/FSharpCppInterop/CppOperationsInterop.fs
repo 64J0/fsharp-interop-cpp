@@ -3,6 +3,11 @@ module CppOperationsInterop
 open System
 open System.Runtime.InteropServices
 open System.Text
+open System.Buffers
+open Microsoft.Win32.SafeHandles
+
+// Library wrapper class for better naming practices
+type LibCppOperations = class end
 
 // P/Invoke library name for C++ operations
 [<Literal>]
@@ -61,18 +66,18 @@ extern void string_to_upper(IntPtr handle)
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
 extern void string_to_lower(IntPtr handle)
 
-// Mathematical operations
+// Mathematical operations with proper array marshaling
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
-extern double calculate_mean_double(double[] values, int count)
+extern double calculate_mean_double([<In>] double[] values, int count)
 
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
-extern float32 calculate_mean_float(float32[] values, int count)
+extern float32 calculate_mean_float([<In>] float32[] values, int count)
 
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
-extern double calculate_variance(double[] values, int count)
+extern double calculate_variance([<In>] double[] values, int count)
 
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
-extern double calculate_standard_deviation(double[] values, int count)
+extern double calculate_standard_deviation([<In>] double[] values, int count)
 
 // Matrix operations
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
@@ -133,7 +138,7 @@ extern double function_call(IntPtr handle, double a, double b)
 
 // Iterator operations
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
-extern IntPtr iterator_create(int[] array, int size)
+extern IntPtr iterator_create([<In>] int[] array, int size)
 
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
 extern void iterator_destroy(IntPtr handle)
@@ -168,122 +173,174 @@ extern CppResultCode safe_matrix_multiply(IntPtr a, IntPtr b, IntPtr& result)
 [<DllImport(CppLibraryName, CallingConvention = CallingConvention.Cdecl)>]
 extern IntPtr get_last_error_message()
 
-// Safe wrapper types and functions
-type CppVector() =
-    let handle = vector_create()
-    let mutable disposed = false
+// SafeHandle implementations for better resource management
+type SafeVectorHandle() =
+    inherit SafeHandleZeroOrMinusOneIsInvalid(true)
     
-    do if handle = IntPtr.Zero then failwith "Failed to create vector"
+    do 
+        let ptr = vector_create()
+        base.SetHandle(ptr)
+            
+    override this.ReleaseHandle() =
+        if not this.IsInvalid then
+            vector_destroy(this.handle)
+        true
+
+type SafeStringCppHandle(initial: string) =
+    inherit SafeHandleZeroOrMinusOneIsInvalid(true)
+    
+    do 
+        let ptr = string_create(initial)
+        base.SetHandle(ptr)
+            
+    override this.ReleaseHandle() =
+        if not this.IsInvalid then
+            string_destroy(this.handle)
+        true
+
+type SafeMatrixHandle(rows: int, cols: int) =
+    inherit SafeHandleZeroOrMinusOneIsInvalid(true)
+    
+    do 
+        let ptr = matrix_create(rows, cols)
+        base.SetHandle(ptr)
+            
+    override this.ReleaseHandle() =
+        if not this.IsInvalid then
+            matrix_destroy(this.handle)
+        true
+
+// SafeHandle for adopting existing matrix pointers
+type SafeMatrixHandleFromPtr(existingPtr: IntPtr) =
+    inherit SafeHandleZeroOrMinusOneIsInvalid(true)
+    
+    do base.SetHandle(existingPtr)
+            
+    override this.ReleaseHandle() =
+        if not this.IsInvalid then
+            matrix_destroy(this.handle)
+        true
+
+type SafeFunctionHandle private (ptr: IntPtr) =
+    inherit SafeHandleZeroOrMinusOneIsInvalid(true)
+    
+    do base.SetHandle(ptr)
+    
+    static member CreateAdd() = new SafeFunctionHandle(function_create_add())
+    static member CreateMultiply() = new SafeFunctionHandle(function_create_multiply())
+    static member CreatePower() = new SafeFunctionHandle(function_create_power())
+            
+    override this.ReleaseHandle() =
+        if not this.IsInvalid then
+            function_destroy(this.handle)
+        true
+
+// Safe wrapper types and functions using SafeHandles
+type CppVector() =
+    let safeHandle = new SafeVectorHandle()
+    
+    do if safeHandle.IsInvalid then failwith "Failed to create vector"
     
     member _.Handle = 
-        if disposed then failwith "Vector has been disposed"
-        handle
+        if safeHandle.IsInvalid then failwith "Vector has been disposed"
+        safeHandle.DangerousGetHandle()
     
-    member _.Add(value: int) = vector_add(handle, value)
-    member _.Get(index: int) = vector_get(handle, index)
-    member _.Size = vector_size(handle)
-    member _.Clear() = vector_clear(handle)
-    member _.Sum() = vector_sum(handle)
-    member _.Sort() = vector_sort(handle)
+    member this.Add(value: int) = vector_add(this.Handle, value)
+    member this.Get(index: int) = vector_get(this.Handle, index)
+    member this.Size = vector_size(this.Handle)
+    member this.Clear() = vector_clear(this.Handle)
+    member this.Sum() = vector_sum(this.Handle)
+    member this.Sort() = vector_sort(this.Handle)
     
-    member _.SafeGet(index: int) =
+    member this.SafeGet(index: int) =
         let mutable result = 0
-        let status = safe_vector_get(handle, index, &result)
+        let status = safe_vector_get(this.Handle, index, &result)
         match status with
         | CppResultCode.Success -> Some result
         | _ -> None
     
     interface IDisposable with
-        member _.Dispose() =
-            if not disposed && handle <> IntPtr.Zero then
-                vector_destroy(handle)
-                disposed <- true
+        member _.Dispose() = safeHandle.Dispose()
 
 type CppString(initial: string) =
-    let handle = string_create(initial)
-    let mutable disposed = false
+    let safeHandle = new SafeStringCppHandle(initial)
     
-    do if handle = IntPtr.Zero then failwith "Failed to create string"
+    do if safeHandle.IsInvalid then failwith "Failed to create string"
     
     member _.Handle = 
-        if disposed then failwith "String has been disposed"
-        handle
+        if safeHandle.IsInvalid then failwith "String has been disposed"
+        safeHandle.DangerousGetHandle()
     
-    member _.Value =
-        let ptr = string_get_cstr(handle)
+    member this.Value =
+        let ptr = string_get_cstr(this.Handle)
         if ptr <> IntPtr.Zero then Marshal.PtrToStringAnsi(ptr) else ""
     
-    member _.Append(text: string) = string_append(handle, text)
-    member _.Prepend(text: string) = string_prepend(handle, text)
-    member _.Length = string_length_cpp(handle)
-    member _.Reverse() = string_reverse(handle)
-    member _.ToUpper() = string_to_upper(handle)
-    member _.ToLower() = string_to_lower(handle)
+    member this.Append(text: string) = string_append(this.Handle, text)
+    member this.Prepend(text: string) = string_prepend(this.Handle, text)
+    member this.Length = string_length_cpp(this.Handle)
+    member this.Reverse() = string_reverse(this.Handle)
+    member this.ToUpper() = string_to_upper(this.Handle)
+    member this.ToLower() = string_to_lower(this.Handle)
     
     interface IDisposable with
-        member _.Dispose() =
-            if not disposed && handle <> IntPtr.Zero then
-                string_destroy(handle)
-                disposed <- true
+        member _.Dispose() = safeHandle.Dispose()
 
-type CppMatrix private (handle: IntPtr) =
-    let mutable disposed = false
-    
+type CppMatrix private (safeHandle: SafeHandleZeroOrMinusOneIsInvalid) =
     // Public constructor
     new(rows: int, cols: int) = 
-        let h = matrix_create(rows, cols)
-        if h = IntPtr.Zero then failwith "Failed to create matrix"
-        new CppMatrix(h)
+        let handle = new SafeMatrixHandle(rows, cols)
+        if handle.IsInvalid then failwith "Failed to create matrix"
+        new CppMatrix(handle :> SafeHandleZeroOrMinusOneIsInvalid)
+    
+    // Constructor for adopting existing pointers
+    internal new(existingHandle: SafeMatrixHandleFromPtr) = 
+        new CppMatrix(existingHandle :> SafeHandleZeroOrMinusOneIsInvalid)
     
     member _.Handle = 
-        if disposed then failwith "Matrix has been disposed"
-        handle
+        if safeHandle.IsInvalid then failwith "Matrix has been disposed"
+        safeHandle.DangerousGetHandle()
     
-    member _.Rows = matrix_rows(handle)
-    member _.Cols = matrix_cols(handle)
-    member _.Set(row: int, col: int, value: double) = matrix_set(handle, row, col, value)
-    member _.Get(row: int, col: int) = matrix_get(handle, row, col)
-    member _.Print() = matrix_print(handle)
+    member this.Rows = matrix_rows(this.Handle)
+    member this.Cols = matrix_cols(this.Handle)
+    member this.Set(row: int, col: int, value: double) = matrix_set(this.Handle, row, col, value)
+    member this.Get(row: int, col: int) = matrix_get(this.Handle, row, col)
+    member this.Print() = matrix_print(this.Handle)
     
-    member _.Multiply(other: CppMatrix) =
-        let resultHandle = matrix_multiply(handle, other.Handle)
+    member this.Multiply(other: CppMatrix) =
+        let resultHandle = matrix_multiply(this.Handle, other.Handle)
         if resultHandle <> IntPtr.Zero then
-            Some (new CppMatrix(resultHandle))
+            // Create a SafeHandle that adopts the existing pointer
+            let newSafeHandle = new SafeMatrixHandleFromPtr(resultHandle)
+            Some (new CppMatrix(newSafeHandle))
         else
             None
     
-    member _.Transpose() =
-        let resultHandle = matrix_transpose(handle)
+    member this.Transpose() =
+        let resultHandle = matrix_transpose(this.Handle)
         if resultHandle <> IntPtr.Zero then
-            Some (new CppMatrix(resultHandle))
+            // Create a SafeHandle that adopts the existing pointer
+            let newSafeHandle = new SafeMatrixHandleFromPtr(resultHandle)
+            Some (new CppMatrix(newSafeHandle))
         else
             None
     
     interface IDisposable with
-        member _.Dispose() =
-            if not disposed && handle <> IntPtr.Zero then
-                matrix_destroy(handle)
-                disposed <- true
+        member _.Dispose() = safeHandle.Dispose()
 
-type CppFunction private(handle: IntPtr, name: string) =
-    let mutable disposed = false
-    
+type CppFunction private(safeHandle: SafeFunctionHandle, name: string) =
     member _.Handle = 
-        if disposed then failwith $"{name} function has been disposed"
-        handle
+        if safeHandle.IsInvalid then failwith $"{name} function has been disposed"
+        safeHandle.DangerousGetHandle()
     
     member _.Name = name
-    member _.Call(a: double, b: double) = function_call(handle, a, b)
+    member this.Call(a: double, b: double) = function_call(this.Handle, a, b)
     
-    static member CreateAdd() = new CppFunction(function_create_add(), "Add")
-    static member CreateMultiply() = new CppFunction(function_create_multiply(), "Multiply") 
-    static member CreatePower() = new CppFunction(function_create_power(), "Power")
+    static member CreateAdd() = new CppFunction(SafeFunctionHandle.CreateAdd(), "Add")
+    static member CreateMultiply() = new CppFunction(SafeFunctionHandle.CreateMultiply(), "Multiply") 
+    static member CreatePower() = new CppFunction(SafeFunctionHandle.CreatePower(), "Power")
     
     interface IDisposable with
-        member _.Dispose() =
-            if not disposed && handle <> IntPtr.Zero then
-                function_destroy(handle)
-                disposed <- true
+        member _.Dispose() = safeHandle.Dispose()
 
 // Helper functions
 let getLastErrorMessage() =
@@ -295,3 +352,35 @@ let calculateStatistics(values: double[]) =
     let variance = calculate_variance(values, values.Length)
     let stdDev = calculate_standard_deviation(values, values.Length)
     (mean, variance, stdDev)
+
+// ArrayPool-based helpers for better performance with large arrays
+let withPooledDoubleArray minLength (action: double[] -> 'U) : 'U =
+    let pool = ArrayPool<double>.Shared
+    let array = pool.Rent(minLength)
+    try
+        action array
+    finally
+        pool.Return(array)
+
+let withPooledFloatArray minLength (action: float32[] -> 'U) : 'U =
+    let pool = ArrayPool<float32>.Shared
+    let array = pool.Rent(minLength)
+    try
+        action array
+    finally
+        pool.Return(array)
+
+// Safe statistical calculations using ArrayPool for large datasets
+let calculateStatisticsSafe(values: double[]) =
+    if values.Length <= 1000 then
+        // Use original array for small arrays
+        calculateStatistics(values)
+    else
+        // Use pooled array for large arrays to reduce GC pressure
+        withPooledDoubleArray values.Length (fun pooledArray ->
+            Array.Copy(values, pooledArray, values.Length)
+            let mean = calculate_mean_double(pooledArray, values.Length)
+            let variance = calculate_variance(pooledArray, values.Length)
+            let stdDev = calculate_standard_deviation(pooledArray, values.Length)
+            (mean, variance, stdDev)
+        )
