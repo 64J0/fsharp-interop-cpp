@@ -84,7 +84,7 @@ let runCallbackDemo() =
     printfn "\n=== Callback Demo ==="
     printfn "Simulating work with progress callbacks..."
     
-    let progressCallback = ProgressCallback(fun progress ->
+    let progressCallback = ProgressCallbackDelegate(fun progress ->
         if progress % 20 = 0 then // Show every 20%
             printfn "Progress: %d%%" progress
     )
