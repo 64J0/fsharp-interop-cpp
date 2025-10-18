@@ -260,6 +260,7 @@ This project provides a solid foundation for more complex scenarios:
 - [speakeztech/Farscape](https://github.com/speakeztech/Farscape).Farscape is a command-line tool that aims to automatically generate idiomatic F# bindings for C/C++ libraries, preserving F# intrinsics.
 - [matthewcrews/OdinPerf](https://github.com/matthewcrews/OdinPerf). With this project, Matthew Crews (the Fast F# guy) makes a performance comparison between F# and Odin programs. There's also this interview where he exposes more about his opinion on this language vs F# considering the scenario he's working on: [Odin Newsletter - Interview with Crews](https://odin-lang.org/news/newsletter-2024-10/#interview-with-crews).
 - [[YouTube] dotnet/C++ Interoperability Within .NET](https://youtu.be/udIEiCAn15E)
+- [64J0/samples--il](https://github.com/64J0/samples--il). Example projects showing how IL code looks like.
 
 ## Contributing
 
